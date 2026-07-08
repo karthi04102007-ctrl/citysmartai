@@ -14,6 +14,7 @@ function App() {
   const [stats, setStats] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [dbMode, setDbMode] = useState('mock');
+  const [role, setRole] = useState('admin'); // 'admin' or 'citizen'
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -33,6 +34,30 @@ function App() {
 
   useEffect(() => {
     fetchData();
+
+    // Establish WebSocket connection for real-time updates
+    const wsUrl = window.location.hostname === 'localhost' ? 'ws://localhost:8000/ws' : `wss://${window.location.host}/ws`;
+    const ws = new WebSocket(wsUrl);
+
+    ws.onmessage = (event) => {
+      try {
+        const message = JSON.parse(event.data);
+        if (message.type === 'REPORT_ADDED') {
+          setReports(prev => [message.data, ...prev]);
+          // We can also re-fetch stats completely to update the dashboard charts
+          getDashboardStats().then(setStats);
+        } else if (message.type === 'REPORT_UPDATED') {
+          setReports(prev => prev.map(r => r.id === message.data.id ? message.data : r));
+          getDashboardStats().then(setStats);
+        }
+      } catch (err) {
+        console.error("Error parsing websocket message", err);
+      }
+    };
+
+    return () => {
+      ws.close();
+    };
   }, []);
 
   const renderPage = () => {
@@ -42,7 +67,7 @@ function App() {
       case 'upload':
         return <Upload onDetectionSuccess={fetchData} />;
       case 'reports':
-        return <Reports reports={reports} isLoading={isLoading} onRefresh={fetchData} />;
+        return <Reports reports={reports} isLoading={isLoading} onRefresh={fetchData} role={role} />;
       case 'map':
         return <Map reports={reports} isLoading={isLoading} />;
       case 'about':
@@ -55,11 +80,11 @@ function App() {
   return (
     <div className="min-h-screen bg-dark-950 flex flex-col">
       {/* Top Navigation */}
-      <Navbar dbMode={dbMode} />
+      <Navbar dbMode={dbMode} role={role} setRole={setRole} />
       
       {/* Sidebar + Main workspace */}
       <div className="flex flex-1 overflow-hidden">
-        <Sidebar activePage={activePage} setActivePage={setActivePage} />
+        <Sidebar activePage={activePage} setActivePage={setActivePage} role={role} />
         
         <main className="flex-1 overflow-y-auto p-6">
           {renderPage()}

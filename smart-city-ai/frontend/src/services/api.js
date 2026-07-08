@@ -7,6 +7,11 @@ const api = axios.create({
   timeout: 10000,
 });
 
+const apiKey = import.meta.env.VITE_API_KEY;
+if (apiKey) {
+  api.defaults.headers.common['x-api-key'] = apiKey;
+}
+
 export const getDashboardStats = async () => {
   const response = await api.get('/api/dashboard');
   return response.data;

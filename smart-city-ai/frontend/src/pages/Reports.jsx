@@ -74,7 +74,8 @@ const Reports = ({ reports, isLoading, onRefresh }) => {
         <ReportTable 
           reports={reports} 
           onStatusChange={handleStatusChange} 
-          onDelete={handleDelete} 
+          onDelete={handleDelete}
+          role={role} 
         />
       )}
     </div>

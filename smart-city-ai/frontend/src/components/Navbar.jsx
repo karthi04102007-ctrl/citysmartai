@@ -1,7 +1,7 @@
 import React from 'react';
-import { Shield, Database, Wifi } from 'lucide-react';
+import { Shield, Database, Wifi, Users, UserCog } from 'lucide-react';
 
-const Navbar = ({ dbMode }) => {
+const Navbar = ({ dbMode, role, setRole }) => {
   return (
     <header className="glass-panel sticky top-0 z-40 flex h-16 w-full items-center justify-between px-6 border-b border-dark-800/80 bg-dark-950/80">
       <div className="flex items-center gap-3">
@@ -15,6 +15,24 @@ const Navbar = ({ dbMode }) => {
       </div>
       
       <div className="flex items-center gap-4">
+        {/* Role Toggle */}
+        <div className="flex bg-dark-900 rounded-lg p-1 border border-dark-800">
+          <button 
+            onClick={() => setRole('citizen')}
+            className={`flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-md transition-colors ${role === 'citizen' ? 'bg-blue-600 text-white' : 'text-dark-400 hover:text-white'}`}
+          >
+            <Users className="h-3.5 w-3.5" />
+            Citizen
+          </button>
+          <button 
+            onClick={() => setRole('admin')}
+            className={`flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-md transition-colors ${role === 'admin' ? 'bg-blue-600 text-white' : 'text-dark-400 hover:text-white'}`}
+          >
+            <UserCog className="h-3.5 w-3.5" />
+            Admin
+          </button>
+        </div>
+
         {/* Dynamic DB Mode Indicator */}
         <div className={`flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold border ${
           dbMode === 'atlas' 

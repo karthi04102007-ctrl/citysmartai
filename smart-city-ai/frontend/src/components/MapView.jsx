@@ -3,6 +3,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { getImageUrl } from '../services/api';
 import StatusBadge from './StatusBadge';
+import HeatmapLayer from './HeatmapLayer';
 
 // Custom colored SVG pin markers to bypass default image path resolution issues in React/Vite
 const createCustomIcon = (status) => {
@@ -40,7 +41,7 @@ const RecenterMap = ({ center }) => {
   return null;
 };
 
-const MapView = ({ reports, center = [9.9252, 78.1198], onMarkerClick }) => {
+const MapView = ({ reports, center = [9.9252, 78.1198], onMarkerClick, viewMode = 'pins' }) => {
   return (
     <div className="w-full h-full relative overflow-hidden rounded-2xl border border-dark-800/60 shadow-lg bg-dark-950">
       <MapContainer 
@@ -59,50 +60,67 @@ const MapView = ({ reports, center = [9.9252, 78.1198], onMarkerClick }) => {
         
         <RecenterMap center={center} />
         
-        {reports.map((report) => {
-          const lat = report.location?.latitude;
-          const lon = report.location?.longitude;
-          if (lat === undefined || lon === undefined || lat === null || lon === null) return null;
-          
-          return (
-            <Marker 
-              key={report.id} 
-              position={[lat, lon]}
-              icon={createCustomIcon(report.status)}
-              eventHandlers={{
-                click: () => {
-                  if (onMarkerClick) onMarkerClick(report);
-                }
-              }}
-            >
-              <Popup>
-                <div className="w-48 text-left space-y-2 p-1">
-                  <div className="flex items-center justify-between border-b border-dark-850 pb-1.5">
+        {viewMode === 'heatmap' ? (
+          <HeatmapLayer points={reports} />
+        ) : (
+          reports.map((report) => {
+            const lat = report.location?.latitude;
+            const lon = report.location?.longitude;
+            if (lat === undefined || lon === undefined || lat === null || lon === null) return null;
+            
+            return (
+              <Marker 
+                key={report.id} 
+                position={[lat, lon]}
+                icon={createCustomIcon(report.status)}
+                eventHandlers={{
+                  click: () => {
+                    if (onMarkerClick) onMarkerClick(report);
+                  }
+                }}
+              >
+                <Popup>
+                  <div className="w-48 text-left space-y-2 p-1">
+                    <div className="flex items-center justify-between border-b border-dark-850 pb-1.5">
                     <span className="font-bold text-white text-xs leading-none">{report.issueType}</span>
-                    <StatusBadge status={report.status} />
-                  </div>
-                  
-                  {report.image && (
-                    <div className="rounded overflow-hidden border border-dark-800 aspect-video bg-dark-950">
-                      <img 
-                        src={getImageUrl(report.image)} 
-                        alt={report.issueType} 
-                        className="w-full h-full object-cover"
-                      />
+                    <div className="flex gap-1 items-center">
+                      <span 
+                        className={`h-2 w-2 rounded-full ${report.severity === 'High' ? 'bg-red-500' : report.severity === 'Low' ? 'bg-emerald-500' : 'bg-amber-500'}`} 
+                        title={`Severity: ${report.severity || 'Medium'}`}
+                      ></span>
+                      <StatusBadge status={report.status} />
                     </div>
-                  )}
-                  
-                  <div className="text-[10px] text-dark-300">
-                    <p className="font-semibold text-dark-200 line-clamp-2 leading-snug">{report.location.address}</p>
-                    <p className="text-[9px] text-dark-500 mt-1 font-mono">
-                      Reported: {new Date(report.reportedAt).toLocaleDateString()} {new Date(report.reportedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </p>
                   </div>
-                </div>
-              </Popup>
-            </Marker>
-          );
-        })}
+                    
+                    {report.image && (
+                      <div className="rounded overflow-hidden border border-dark-800 aspect-video bg-dark-950">
+                        <img 
+                          src={getImageUrl(report.image)} 
+                          alt={report.issueType} 
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    )}
+                    
+                    <div className="text-[10px] text-dark-300">
+                    <p className="font-semibold text-dark-200 line-clamp-2 leading-snug">{report.location.address}</p>
+                    <div className="flex items-center justify-between mt-1">
+                      <p className="text-[9px] text-dark-500 font-mono">
+                        Reported: {new Date(report.reportedAt).toLocaleDateString()}
+                      </p>
+                      {report.costEstimate > 0 && (
+                        <span className="text-[9px] font-mono text-amber-400/80 bg-amber-500/10 px-1 rounded border border-amber-500/20">
+                          Est: ${report.costEstimate}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  </div>
+                </Popup>
+              </Marker>
+            );
+          })
+        )}
       </MapContainer>
     </div>
   );

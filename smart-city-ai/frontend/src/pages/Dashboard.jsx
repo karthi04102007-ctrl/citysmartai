@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { 
   ResponsiveContainer, 
   BarChart, 
@@ -65,7 +66,10 @@ const Dashboard = ({ stats, reports, setActivePage }) => {
         {cardData.map((card, idx) => {
           const Icon = card.icon;
           return (
-            <div 
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: idx * 0.1 }}
               key={idx} 
               className="glass-panel rounded-2xl p-5 border border-dark-800/60 bg-dark-900/20 hover:border-dark-700/50 hover:bg-dark-900/40 transition-all duration-300 group"
             >
@@ -80,7 +84,7 @@ const Dashboard = ({ stats, reports, setActivePage }) => {
                   <Icon className={`h-5 w-5 ${card.color}`} />
                 </div>
               </div>
-            </div>
+            </motion.div>
           );
         })}
       </div>
@@ -166,8 +170,11 @@ const Dashboard = ({ stats, reports, setActivePage }) => {
         </div>
 
         <div className="grid grid-cols-4 gap-4">
-          {reports && reports.slice(0, 4).map((report) => (
-            <div 
+          {reports && reports.slice(0, 4).map((report, idx) => (
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.3, delay: 0.2 + (idx * 0.1) }}
               key={report.id}
               className="glass-card rounded-xl overflow-hidden border border-dark-800/50 flex flex-col justify-between"
             >
@@ -199,7 +206,7 @@ const Dashboard = ({ stats, reports, setActivePage }) => {
                   )}
                 </div>
               </div>
-            </div>
+            </motion.div>
           ))}
           
           {(!reports || reports.length === 0) && (

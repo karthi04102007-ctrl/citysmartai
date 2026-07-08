@@ -3,6 +3,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from app.core.config import settings
 from bson import ObjectId
 from datetime import datetime
+from app.services.websocket_service import ws_manager
 
 logger = logging.getLogger("smart-city-ai")
 logging.basicConfig(level=logging.INFO)
@@ -129,12 +130,14 @@ class Database:
             await self.db.reports.insert_one(doc)
             doc["id"] = str(doc["_id"])
             doc.pop("_id", None)
+            await ws_manager.broadcast({"type": "REPORT_ADDED", "data": doc})
             return doc
         else:
             doc = report.copy()
             if "id" not in doc:
                 doc["id"] = str(ObjectId())
             self._reports[doc["id"]] = doc
+            await ws_manager.broadcast({"type": "REPORT_ADDED", "data": doc})
             return doc
 
     async def get_reports(self) -> list:
@@ -173,13 +176,18 @@ class Database:
                     {"_id": ObjectId(report_id)},
                     {"$set": update_data}
                 )
-                return await self.get_report(report_id)
+                updated_doc = await self.get_report(report_id)
+                if updated_doc:
+                    await ws_manager.broadcast({"type": "REPORT_UPDATED", "data": updated_doc})
+                return updated_doc
             except Exception:
                 return None
         else:
             if report_id in self._reports:
                 self._reports[report_id].update(update_data)
-                return self._reports[report_id]
+                updated_doc = self._reports[report_id]
+                await ws_manager.broadcast({"type": "REPORT_UPDATED", "data": updated_doc})
+                return updated_doc
             return None
 
     async def delete_report(self, report_id: str) -> bool:

@@ -36,6 +36,8 @@ class ReportService:
         issue_type = detection["issue"]
         confidence = detection["confidence"]
         annotated_image = detection["annotatedImage"]
+        severity = detection.get("severity", "Medium")
+        cost_estimate = detection.get("costEstimate", 0)
         
         # 2. Retrieve coordinates (EXIF GPS metadata first, then manual form input fallback)
         lat, lon = manual_lat, manual_lon
@@ -107,6 +109,8 @@ class ReportService:
             "status": "Pending",
             "authority": authority_name,
             "emailSent": False,
+            "severity": severity,
+            "costEstimate": cost_estimate,
             "reportedAt": datetime.now().isoformat()
         }
         

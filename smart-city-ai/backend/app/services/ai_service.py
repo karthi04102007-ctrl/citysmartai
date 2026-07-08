@@ -65,6 +65,7 @@ class AIService:
                         
                         mapped_class = self._map_to_standard_class(class_name)
                         annotated_img_path = await self._annotate_image(image_path, mapped_class, confidence, xyxy)
+                        severity, cost = self._estimate_severity_and_cost(mapped_class)
                         
                         return {
                             "detected": True,
@@ -72,6 +73,8 @@ class AIService:
                             "confidence": round(confidence, 2),
                             "box": xyxy,
                             "annotatedImage": annotated_img_path,
+                            "severity": severity,
+                            "costEstimate": cost,
                             "mode": "YOLO Real Model"
                         }
             except Exception as e:
@@ -106,6 +109,7 @@ class AIService:
         xyxy = [x1, y1, x2, y2]
         
         annotated_img_path = await self._annotate_image(image_path, issue_type, confidence, xyxy)
+        severity, cost = self._estimate_severity_and_cost(issue_type)
         
         return {
             "detected": True,
@@ -113,8 +117,21 @@ class AIService:
             "confidence": confidence,
             "box": xyxy,
             "annotatedImage": annotated_img_path,
+            "severity": severity,
+            "costEstimate": cost,
             "mode": "Simulation AI"
         }
+
+    def _estimate_severity_and_cost(self, issue_type: str) -> tuple:
+        if issue_type == "Pothole":
+            return random.choice(["Low", "Medium", "High"]), random.randint(50, 500)
+        elif issue_type == "Street Light Fault":
+            return random.choice(["Medium", "High"]), random.randint(100, 300)
+        elif issue_type == "Drainage Overflow":
+            return "High", random.randint(500, 2000)
+        elif issue_type == "Fallen Tree":
+            return "High", random.randint(200, 1000)
+        return "Medium", random.randint(50, 500)
 
     def _map_to_standard_class(self, class_name: str) -> str:
         name_lower = class_name.lower()

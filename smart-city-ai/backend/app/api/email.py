@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, Path
 from app.database.mongodb import db
 from app.services.email_service import email_service
+from app.services.sms_service import sms_service
 from app.models.report_model import AUTHORITY_MAPPING
 
 router = APIRouter()
@@ -31,12 +32,20 @@ async def send_email_alert(report_id: str = Path(..., description="The ID of the
         authority_email=auth_info["email"]
     )
     
+    # Also trigger SMS alert (in phase 3 we can restrict this to HIGH severity only)
+    sms_result = await sms_service.send_sms_alert(
+        issue_type=issue_type,
+        address=address,
+        authority_name=auth_info["name"]
+    )
+    
     if email_result.get("sent"):
         await db.update_report(report_id, {"emailSent": True})
         return {
             "status": "success",
-            "message": "Email alert sent successfully.",
-            "emailDetails": email_result
+            "message": "Alerts sent successfully.",
+            "emailDetails": email_result,
+            "smsDetails": sms_result
         }
     else:
         return {

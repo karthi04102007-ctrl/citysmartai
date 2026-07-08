@@ -8,14 +8,14 @@ import {
   ChevronRight
 } from 'lucide-react';
 
-const Sidebar = ({ activePage, setActivePage }) => {
+const Sidebar = ({ activePage, setActivePage, role }) => {
   const menuItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'upload', label: 'Analyze Upload', icon: UploadCloud },
-    { id: 'reports', label: 'Surveillance Logs', icon: FileText },
-    { id: 'map', label: 'Incident Map', icon: Map },
-    { id: 'about', label: 'About Project', icon: Info },
-  ];
+    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['admin'] },
+    { id: 'upload', label: 'Analyze Upload', icon: UploadCloud, roles: ['admin', 'citizen'] },
+    { id: 'reports', label: 'Surveillance Logs', icon: FileText, roles: ['admin', 'citizen'] },
+    { id: 'map', label: 'Incident Map', icon: Map, roles: ['admin'] },
+    { id: 'about', label: 'About Project', icon: Info, roles: ['admin', 'citizen'] },
+  ].filter(item => item.roles.includes(role));
 
   return (
     <aside className="w-64 border-r border-dark-800/80 bg-dark-950 flex flex-col h-[calc(100vh-4rem)] p-4 justify-between">

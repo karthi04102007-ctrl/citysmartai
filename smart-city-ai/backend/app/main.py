@@ -1,10 +1,19 @@
 import os
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends, HTTPException, Security, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.security.api_key import APIKeyHeader
 from app.core.config import settings
 from app.database.mongodb import db
 from app.api import detection, reports, location, email
+
+api_key_header = APIKeyHeader(name="x-api-key", auto_error=False)
+
+async def verify_api_key(api_key: str = Security(api_key_header)):
+    if settings.API_KEY:
+        if not api_key or api_key != settings.API_KEY:
+            raise HTTPException(status_code=403, detail="Could not validate credentials")
+    return api_key
 
 app = FastAPI(
     title="Smart City AI CCTV API",
@@ -49,8 +58,20 @@ async def read_root():
         "databaseMode": db_mode
     }
 
-# Include routers
-app.include_router(detection.router, prefix="/api")
-app.include_router(reports.router, prefix="/api")
-app.include_router(location.router, prefix="/api")
-app.include_router(email.router, prefix="/api")
+# Include routers with API key validation
+app.include_router(detection.router, prefix="/api", dependencies=[Depends(verify_api_key)])
+app.include_router(reports.router, prefix="/api", dependencies=[Depends(verify_api_key)])
+app.include_router(location.router, prefix="/api", dependencies=[Depends(verify_api_key)])
+app.include_router(email.router, prefix="/api", dependencies=[Depends(verify_api_key)])
+
+from app.services.websocket_service import ws_manager
+
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    await ws_manager.connect(websocket)
+    try:
+        while True:
+            # We don't expect messages from the client in this app, just listening
+            await websocket.receive_text()
+    except WebSocketDisconnect:
+        ws_manager.disconnect(websocket)

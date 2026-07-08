@@ -14,6 +14,8 @@ class ReportCreate(BaseModel):
     status: str = "Pending"
     authority: str
     emailSent: bool = False
+    severity: Optional[str] = "Medium"
+    costEstimate: Optional[int] = 0
 
 class ReportUpdate(BaseModel):
     status: Optional[str] = None
@@ -29,4 +31,6 @@ class ReportResponse(BaseModel):
     status: str
     authority: str
     emailSent: bool
+    severity: Optional[str] = None
+    costEstimate: Optional[int] = None
     reportedAt: str

@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { AlertCircle, Navigation, MapPin } from 'lucide-react';
+import { AlertCircle, Navigation, MapPin, Layers } from 'lucide-react';
 import MapView from '../components/MapView';
 import StatusBadge from '../components/StatusBadge';
 
 const Map = ({ reports, isLoading }) => {
   const [mapCenter, setMapCenter] = useState([9.9252, 78.1198]);
+  const [viewMode, setViewMode] = useState('pins');
 
   const handleIncidentFocus = (report) => {
     const lat = report.location?.latitude;
@@ -16,9 +17,35 @@ const Map = ({ reports, isLoading }) => {
 
   return (
     <div className="space-y-6 h-[calc(100vh-8rem)] flex flex-col">
-      <div>
-        <h2 className="text-xl font-extrabold text-white">Spatial Surveillance Map</h2>
-        <p className="text-xs text-dark-400">Locate infrastructure anomalies and monitor dispatch alerts on a map</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-xl font-extrabold text-white">Spatial Surveillance Map</h2>
+          <p className="text-xs text-dark-400">Locate infrastructure anomalies and monitor dispatch alerts on a map</p>
+        </div>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setViewMode('pins')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wide flex items-center gap-1.5 transition-all ${
+              viewMode === 'pins' 
+                ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' 
+                : 'bg-dark-900/30 text-dark-400 border border-dark-800 hover:text-white'
+            }`}
+          >
+            <MapPin className="h-3.5 w-3.5" />
+            Pins
+          </button>
+          <button
+            onClick={() => setViewMode('heatmap')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wide flex items-center gap-1.5 transition-all ${
+              viewMode === 'heatmap' 
+                ? 'bg-red-500/20 text-red-400 border border-red-500/30' 
+                : 'bg-dark-900/30 text-dark-400 border border-dark-800 hover:text-white'
+            }`}
+          >
+            <Layers className="h-3.5 w-3.5" />
+            Heatmap
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-4 gap-6 flex-1 min-h-0">
@@ -33,6 +60,7 @@ const Map = ({ reports, isLoading }) => {
               reports={reports} 
               center={mapCenter} 
               onMarkerClick={handleIncidentFocus}
+              viewMode={viewMode}
             />
           )}
         </div>

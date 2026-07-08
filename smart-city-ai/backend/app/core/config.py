@@ -3,6 +3,9 @@ from pydantic import Field
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
+    # Security
+    API_KEY: str = Field(default="")
+    
     MONGODB_URI: str = Field(default="")
     DATABASE_NAME: str = Field(default="smart_city_ai")
     

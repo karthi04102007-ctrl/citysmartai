@@ -2,7 +2,7 @@ import React from 'react';
 import { Mail, Check, AlertTriangle, Trash2, MapPin } from 'lucide-react';
 import StatusBadge from './StatusBadge';
 
-const ReportTable = ({ reports, onStatusChange, onDelete }) => {
+const ReportTable = ({ reports, onStatusChange, onDelete, role = 'admin' }) => {
   if (!reports || reports.length === 0) {
     return (
       <div className="glass-panel rounded-2xl p-12 text-center border border-dark-800/60 bg-dark-900/10">
@@ -40,6 +40,7 @@ const ReportTable = ({ reports, onStatusChange, onDelete }) => {
               <th className="py-4 px-4">Confidence</th>
               <th className="py-4 px-4">Reported At</th>
               <th className="py-4 px-4 text-center">Alert</th>
+              <th className="py-4 px-4">Severity / Cost</th>
               <th className="py-4 px-4">Status</th>
               <th className="py-4 px-4 text-right">Action</th>
             </tr>
@@ -104,12 +105,29 @@ const ReportTable = ({ reports, onStatusChange, onDelete }) => {
                   </div>
                 </td>
 
+                {/* Severity / Cost */}
+                <td className="py-4 px-4">
+                  <div className="flex flex-col gap-1">
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold w-max ${
+                      report.severity === 'High' ? 'bg-red-500/20 text-red-400 border border-red-500/30' :
+                      report.severity === 'Medium' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' :
+                      'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                    }`}>
+                      {report.severity || 'Medium'}
+                    </span>
+                    <span className="text-[10px] text-dark-300 font-mono">
+                      ${report.costEstimate || 0}
+                    </span>
+                  </div>
+                </td>
+
                 {/* Interactive Status Selector */}
                 <td className="py-4 px-4">
                   <select
                     value={report.status}
                     onChange={(e) => onStatusChange(report.id, e.target.value)}
-                    className="bg-dark-900 border border-dark-800 text-dark-200 rounded-lg py-1 px-2.5 font-medium focus:outline-none focus:border-blue-500/40 text-xs shadow-sm cursor-pointer"
+                    disabled={role === 'citizen'}
+                    className={`bg-dark-900 border border-dark-800 text-dark-200 rounded-lg py-1 px-2.5 font-medium focus:outline-none focus:border-blue-500/40 text-xs shadow-sm ${role === 'citizen' ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                   >
                     <option value="Pending">Pending</option>
                     <option value="Assigned">Assigned</option>
@@ -119,13 +137,15 @@ const ReportTable = ({ reports, onStatusChange, onDelete }) => {
 
                 {/* Delete button */}
                 <td className="py-4 px-4 text-right">
-                  <button
-                    onClick={() => onDelete(report.id)}
-                    className="h-8 w-8 inline-flex items-center justify-center rounded-lg bg-dark-900 hover:bg-red-500/10 hover:text-red-400 text-dark-400 border border-dark-800 hover:border-red-500/20 transition-all cursor-pointer opacity-80 group-hover:opacity-100"
-                    title="Delete report"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </button>
+                  {role === 'admin' && (
+                    <button
+                      onClick={() => onDelete(report.id)}
+                      className="h-8 w-8 inline-flex items-center justify-center rounded-lg bg-dark-900 hover:bg-red-500/10 hover:text-red-400 text-dark-400 border border-dark-800 hover:border-red-500/20 transition-all cursor-pointer opacity-80 group-hover:opacity-100"
+                      title="Delete report"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  )}
                 </td>
               </tr>
             ))}
