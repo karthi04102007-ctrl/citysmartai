@@ -57,15 +57,6 @@ async def read_root():
         "status": "online",
         "databaseMode": db_mode
     }
-
-# Include routers with API key validation
-app.include_router(detection.router, prefix="/api", dependencies=[Depends(verify_api_key)])
-app.include_router(reports.router, prefix="/api", dependencies=[Depends(verify_api_key)])
-app.include_router(location.router, prefix="/api", dependencies=[Depends(verify_api_key)])
-app.include_router(email.router, prefix="/api", dependencies=[Depends(verify_api_key)])
-
-from app.services.websocket_service import ws_manager
-
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await ws_manager.connect(websocket)
@@ -75,3 +66,12 @@ async def websocket_endpoint(websocket: WebSocket):
             await websocket.receive_text()
     except WebSocketDisconnect:
         ws_manager.disconnect(websocket)
+
+# Include routers with API key validation
+app.include_router(detection.router, prefix="/api", dependencies=[Depends(verify_api_key)])
+app.include_router(reports.router, prefix="/api", dependencies=[Depends(verify_api_key)])
+app.include_router(location.router, prefix="/api", dependencies=[Depends(verify_api_key)])
+app.include_router(email.router, prefix="/api", dependencies=[Depends(verify_api_key)])
+
+from app.services.websocket_service import ws_manager
+

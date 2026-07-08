@@ -4,10 +4,10 @@ import ReportTable from '../components/ReportTable';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { updateReportStatus, deleteReport } from '../services/api';
 
-const Reports = ({ reports, isLoading, onRefresh }) => {
+const Reports = ({ reports, isLoading, onRefresh, role }) => {
   const [isUpdating, setIsUpdating] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-
+  const userrole = 'admin'
   const handleStatusChange = async (id, newStatus) => {
     setIsUpdating(true);
     setErrorMessage('');
@@ -26,7 +26,7 @@ const Reports = ({ reports, isLoading, onRefresh }) => {
     if (!window.confirm('Are you sure you want to delete this incident report from municipal records?')) {
       return;
     }
-    
+
     setIsUpdating(true);
     setErrorMessage('');
     try {
@@ -48,7 +48,7 @@ const Reports = ({ reports, isLoading, onRefresh }) => {
           <h2 className="text-xl font-extrabold text-white font-sans">Surveillance Incident Logs</h2>
           <p className="text-xs text-dark-400">Manage, inspect, and transition statuses of detected anomalies</p>
         </div>
-        
+
         <button
           onClick={onRefresh}
           disabled={isLoading || isUpdating}
@@ -71,11 +71,11 @@ const Reports = ({ reports, isLoading, onRefresh }) => {
           <LoadingSpinner message="Retrieving database entries..." />
         </div>
       ) : (
-        <ReportTable 
-          reports={reports} 
-          onStatusChange={handleStatusChange} 
+        <ReportTable
+          reports={reports}
+          onStatusChange={handleStatusChange}
           onDelete={handleDelete}
-          role={role} 
+          role={role}
         />
       )}
     </div>

@@ -21,7 +21,7 @@ function App() {
     try {
       const reportsData = await getReports();
       setReports(reportsData);
-      
+
       const statsData = await getDashboardStats();
       setStats(statsData);
       setDbMode(statsData.dbMode || 'mock');
@@ -36,7 +36,7 @@ function App() {
     fetchData();
 
     // Establish WebSocket connection for real-time updates
-    const wsUrl = window.location.hostname === 'localhost' ? 'ws://localhost:8000/ws' : `wss://${window.location.host}/ws`;
+    const wsUrl = window.location.hostname === 'localhost' ? 'ws://localhost:8000/api/ws' : `wss://${window.location.host}/ws`;
     const ws = new WebSocket(wsUrl);
 
     ws.onmessage = (event) => {
@@ -81,11 +81,11 @@ function App() {
     <div className="min-h-screen bg-dark-950 flex flex-col">
       {/* Top Navigation */}
       <Navbar dbMode={dbMode} role={role} setRole={setRole} />
-      
+
       {/* Sidebar + Main workspace */}
       <div className="flex flex-1 overflow-hidden">
         <Sidebar activePage={activePage} setActivePage={setActivePage} role={role} />
-        
+
         <main className="flex-1 overflow-y-auto p-6">
           {renderPage()}
         </main>
