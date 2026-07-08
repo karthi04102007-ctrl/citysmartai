@@ -12,6 +12,7 @@
   "dependencies": {
     "@types/leaflet.heat": "^0.2.5",
     "axios": "^1.18.1",
+    "framer-motion": "^12.42.2",
     "leaflet": "^1.9.4",
     "leaflet.heat": "^0.2.0",
     "lucide-react": "^1.23.0",
